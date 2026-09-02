@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+
+
+body {
+
+    font-family: 'Inter', sans-serif;
+
+}
+
+
+
+.word-block {
+
+    display: inline-block;
+
+    font-family: 'Fira Code', monospace;
+
+    font-size: 16px;
+
+    letter-spacing: 2px;
+
+    padding: 2px 4px;
+
+    margin: 2px 2px;
+
+    border-radius: 4px;
+
+    transition: all 0.25s ease-in-out;
+
+    vertical-align: middle;
+
+}
+
+
+
+.word-block.hidden-word {
+
+    position: relative;
+
+    background-color: #1e293b;
+
+    color: #38bdf8;
+
+    user-select: none;
+
+    cursor: help;
+
+}
+
+
+
+.word-block.hidden-word::after {
+
+    content: attr(data-count);
+
+    position: absolute;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform: translate(-50%, -50%) scale(0.85);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 20px;
+
+    height: 20px;
+
+    padding: 0 5px;
+
+    border-radius: 999px;
+
+    background-color: #f97316;
+
+    color: #ffffff;
+
+    font-family: 'Fira Code', monospace;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    letter-spacing: normal;
+
+    white-space: nowrap;
+
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 0.15s ease-in-out, transform 0.15s ease-in-out;
+
+}
+
+
+
+.word-block.hidden-word:hover::after {
+
+    opacity: 1;
+
+    transform: translate(-50%, -50%) scale(1);
+
+}
+
+
+
+.word-block.revealed-word {
+
+    background-color: #f1f5f9;
+
+    color: #0f172a;
+
+    font-family: 'Inter', sans-serif;
+
+    letter-spacing: normal;
+
+}
+
+.word-block.similar-word {
+
+    background-color: #1d1f20;
+
+    color: #25c0eb;
+
+    font-weight: 600;
+
+    border : 1px solid #93c5fd;
+
+    max-width: 150px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+
+.title-zone .word-block.revealed-word {
+
+    background-color: #e0f2fe;
+
+    color: #0369a1;
+
+    font-weight: 700;
+
+}
+
+
+
+.toast-notification {
+
+    position: fixed;
+
+    bottom: 24px;
+
+    right: 24px;
+
+    transform: translateY(100px);
+
+    opacity: 0;
+
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    z-index: 100;
+
+}
+
+.toast-notification.show {
+
+    transform: translateY(0);
+
+    opacity: 1;
+
+}
+
+#suggestionsList {
+
+    list-style: none;
+
+    padding: 0;
+
+    margin: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 0.6rem;
+
+}
+
+#suggestionsList li {
+
+    border-left: 3px solid #38bdf8;
+
+    background: #ffffff;
+
+    padding: 0.7rem 0.8rem;
+
+    border-radius: 0.75rem;
+
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+
+}
+
+#suggestionInput {
+
+    min-height: 42px;
+
+}

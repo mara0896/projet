@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pédantox Technodoo</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <link rel="stylesheet" href="main.css">
+
+</head>
+
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col items-center p-4 md:p-8">
+
+
+
+    <div id="toastNotification" class="toast-notification bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-slate-700">
+
+        <span id="toastIcon">⚠️</span>
+
+        <span id="toastMessage" class="text-sm font-medium">Message de notification</span>
+
+    </div>
+
+
+
+    <header class="text-center max-w-2xl mb-8">
+
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight flex items-center justify-center gap-3 mb-2">
+
+            🕵️‍♂️ Pédantox <span class="text-sky-600">Technodoo</span>
+
+        </h1>
+
+        <p class="text-slate-500 font-medium">Trouvez les concepts clés de notre formation. GLHF mais please allez pas dans le script c'est hardcodé, je viens seulement d'apprendre le code </p>
+
+    </header>
+
+
+
+    <main class="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+       
+
+        <div class="lg:col-span-2 space-y-6">
+
+           
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+
+                <div class="flex justify-between items-center mb-3">
+
+                    <span id="levelIndicator" class="text-sm font-bold text-slate-500">Niveau 1 / 4</span>
+
+                    <span id="percentIndicator" class="text-sm font-extrabold text-sky-600 bg-sky-50 px-3 py-1 rounded-full">0%</span>
+
+                </div>
+
+                <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden">
+
+                    <div id="progressBarFill" class="bg-gradient-to-r from-sky-500 to-blue-600 h-full w-0 transition-all duration-500 rounded-full"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <div id="victoryMessage" class="hidden bg-emerald-500 text-white p-6 rounded-2xl shadow-lg text-center transform transition duration-500 scale-100">
+
+                <h2 class="text-2xl font-bold mb-2"> Niveau Réussi !</h2>
+
+                <p id="victoryText" class="text-emerald-100 mb-4 font-medium">Vous avez trouvé le titre</p>
+
+                <button id="btnNextLevel" class="bg-white text-emerald-700 hover:bg-emerald-50 px-6 py-3 rounded-xl font-bold shadow-md transition transform hover:-translate-y-0.5 active:translate-y-0">
+
+                    Passer au niveau suivant [=>]
+
+                </button>
+
+            </div>
+
+
+
+
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+
+                <form id="gameForm" class="flex flex-col sm:flex-row gap-3">
+
+                    <input type="text" id="wordInput" placeholder="Proposez un mot (ex: Robin, code, bug...)" autocomplete="off" autofocus
+
+                           class="flex-1 px-4 py-3 rounded-xl border-2 border-slate-200 outline-none focus:border-sky-500 transition font-medium text-slate-700">
+
+                    <div class="flex gap-2">
+
+                        <button type="submit" id="btnSubmit" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-3 rounded-xl font-bold shadow-sm transition">
+
+                            Tester
+
+                        </button>
+
+                        <button type="button" id="btnHint" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-3 rounded-xl font-bold shadow-sm transition">
+
+                            Indice
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+
+
+
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-100">
+
+                <div id="titleZone" class="title-zone border-b-2 border-slate-100 pb-4 mb-6 text-xl md:text-2xl tracking-wide leading-relaxed"></div>
+
+                <div id="bodyZone" class="text-base md:text-lg leading-relaxed text-slate-700"></div>
+
+            </div>
+
+        </div>
+
+
+
+        <div class="space-y-6">
+
+           
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 grid grid-cols-2 gap-4">
+
+                <div class="bg-slate-50 p-4 rounded-xl text-center">
+
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Découvertes</p>
+
+                    <span id="motsTrouves" class="text-2xl font-black text-slate-700">0</span>
+
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl text-center">
+
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Essais</p>
+
+                    <span id="nbTentatives" class="text-2xl font-black text-slate-700">0</span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col min-h-[300px] max-h-[500px]">
+
+                <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+
+                    Historique des tentatives
+
+                </h3>
+
+                <div class="overflow-y-auto flex-1 pr-1">
+
+                    <table class="w-full text-left border-collapse">
+
+                        <thead>
+
+                            <tr class="border-b border-slate-100 text-xs text-slate-400 font-bold uppercase">
+
+                                <th class="pb-2">N°</th>
+
+                                <th class="pb-2">Mot</th>
+
+                                <th class="pb-2 text-right">Occurrences</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="historyBody" class="text-sm font-medium text-slate-600 divide-y divide-slate-50">
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script src="levels.js" defer></script>
+    <script src="index.js" defer></script>
+
+</body>
+
+</html>
