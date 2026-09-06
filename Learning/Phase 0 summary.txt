@@ -1,0 +1,137 @@
+Phase 0 summary
+Phase 0 taught you how to create a safe, reproducible foundation before building Flask features.
+
+1. Git repository and safety
+You learned that Git is your undo button.
+
+Important files:
+
+- .gitignore: excludes local and generated files
+- .env.local: private configuration; never commit it
+- docker-compose.yml: reproducible database setup
+- requirements.txt: Python dependencies
+
+Commands:
+git status
+Shows modified, staged, and untracked files.
+
+git check-ignore -v .env.local
+Confirms that .env.local is ignored.
+
+
+Your .gitignore should include:
+.env.local
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+
+2. Docker Compose configuration
+You learned that:
+
+- a Compose file describes multiple containers
+- each service represents a container
+- postgres is the database service
+- app would be the Flask container
+- mailpit would capture test emails
+- For Phase 0, you only need PostgreSQL. The app and Mailpit belong later.
+
+You also learned the difference between:
+- docker compose config   : This validates and expands the Compose file, but does not start anything.
+- docker compose up -d postgres  : This starts only PostgreSQL in the background.
+- docker compose up -d  :  This starts every service in the Compose file.
+- docker compose ps  : Shows running services.
+- docker compose logs postgres  : Shows PostgreSQL startup and error logs.
+
+
+3. Environment variables
+Your .env.local contains the PostgreSQL setup:
+POSTGRES_DB= ****
+POSTGRES_USER= ****
+POSTGRES_PASSWORD= ****
+
+You learned that Compose reads these values and passes them to the PostgreSQL container.
+
+You also learned why .env.local must be ignored:
+- it contains credentials
+- it is machine-specific
+- secrets committed to Git history are difficult to remove permanently
+
+
+4. Persistent PostgreSQL storage
+You learned that PostgreSQL needs a named Docker volume.
+
+The important mapping is:
+postgres_data:/var/lib/postgresql/data 
+The named volume stores the actual database files outside the temporary container.
+
+You learned this distinction:
+- docker compose down  : Stops and removes containers but preserves named volumes.
+- docker compose down -v  :  Also deletes volumes and database data. Therefore, do not use -v during the normal persistence test.
+
+
+5. Python virtual environment
+You learned how to isolate project dependencies from global Python.
+
+Commands:
+- py --version  :  Checks that Python is installed.
+- py -m venv .venv  : Creates the virtual environment.
+- .\.venv\Scripts\Activate.ps1  : Activates it in PowerShell.
+	If PowerShell blocks activation: Set-ExecutionPolicy -Scope Process Bypass Then activate again.
+
+
+Install the Phase 0 dependencies:
+python -m pip install --upgrade pip
+python -m pip install Flask SQLAlchemy "psycopg[binary]" python-dotenv
+
+Saved the installed packages in requirements:
+python -m pip freeze > requirements.txt
+
+Check installed packages:
+python -m pip list
+
+
+6. Docker Desktop and the Docker engine
+You learned that the Docker CLI and Docker engine are separate:
+
+- Docker CLI: the commands you type
+- Docker engine: the background service that actually runs containers
+- Docker Desktop: the Windows application that provides the engine
+
+This error: failed to connect to the docker API
+Simply means the CLI exists, but Docker Desktop or its Linux engine is not running.
+
+Useful commands:
+- docker version  : Checks the client and server connection.
+- docker context ls  : Shows the active Docker context.
+- docker info  : Confirms whether the Docker engine is available.
+- If Docker Desktop is down : wsl --status  wsl --shutdown   Then reopen Docker Desktop.
+
+
+7. Connecting to PostgreSQL
+You learned that you do not need to install psql on Windows because the PostgreSQL container already includes it.
+
+Connect inside the container:   docker compose exec postgres psql -U postgres -d mydb
+
+Inside psql, test the connection: SELECT current_database(), current_user;
+exit with : \q
+
+You can also run one command without entering the interactive shell:
+docker compose exec postgres psql -U postgres -d mydb -c "SELECT current_database(), current_user;"
+
+
+8. Testing persistence
+- Create test data:
+docker compose exec postgres psql -U postgres -d mydb -c "CREATE TABLE phase0_test (id integer, message text); INSERT INTO phase0_test VALUES (1, 'data survives');"
+
+- Stop the containers:
+docker compose down
+
+- Start PostgreSQL again:
+docker compose up -d postgres
+
+- Check that the data remains:
+docker compose exec postgres psql -U postgres -d mydb -c "SELECT * FROM phase0_test;"
+If the row still appears, your named volume works.
