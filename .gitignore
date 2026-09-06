@@ -1,6 +1,9 @@
 # local env
-.venv/*
+.env.local
+venv/
+.venv/
 
 # Python cache
 __pycache__
-*.pyc-
+*.pyc
+.pytest_cache/

@@ -1,0 +1,19 @@
+# Service = one container (app, postgres, mailpit ...)
+# compose file = list of containers belonging to the same app
+# run "docker compose up -d" means create and run all containers
+# run "docker compose up -d postgres" means create and run only the postgres container
+
+services:
+
+  postgres:
+    image: postgres:16
+    env_file: .env.local
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+
