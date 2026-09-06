@@ -1,0 +1,1 @@
+# Holds SQLAlchemy database instance and other Flask extensions

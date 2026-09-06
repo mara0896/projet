@@ -1,0 +1,1 @@
+# Manage all the dependencies and services for the app

@@ -1,0 +1,1 @@
+# Defines the first blueprint for the app and its routes

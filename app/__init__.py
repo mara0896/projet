@@ -1,0 +1,1 @@
+# Creates Flask app instance and initializes extensions

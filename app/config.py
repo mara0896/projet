@@ -1,0 +1,1 @@
+# Load all settings and initialize Flask app instance
