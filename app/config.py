@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 
 # load environment
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 load_dotenv(".env.local")
 
 
@@ -27,7 +27,7 @@ def _required_env(name: str) -> str:
     return value
 
 
-# Select configuration based on the environment name (development, testing, production)
+# Select configuration based on the environment name.
 def get_config(config_name: str = "development") -> Config:
     if config_name == "testing":
         return Config(

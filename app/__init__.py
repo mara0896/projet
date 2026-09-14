@@ -4,10 +4,13 @@ from flask import Flask, g
 
 from .config import get_config
 from .container import create_container
+from .extensions import db, migrate
 
 
 # Flask app Factory function
-# Create a new app every time this function is called (multiple instances authorized like test_app and dev_app simultaneously)
+# Create a new app every time this function is called.
+# This allows separate development and test app instances.
+
 def create_app(config_name: str = "development") -> Flask:
     app = Flask(__name__)
 
@@ -19,6 +22,12 @@ def create_app(config_name: str = "development") -> Flask:
         DEBUG=config.debug,
         TESTING=config.testing,
     )
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    # Import models so Flask-Migrate can discover their metadata.
+    from . import models  # noqa: F401
 
     app.extensions["container"] = create_container()
 
