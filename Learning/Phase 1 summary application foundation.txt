@@ -1,0 +1,247 @@
+Phase 1 summary: application foundation
+Phase 1 taught you how to create a clean, configurable Flask application before adding game features.
+
+The main goal was: flask run serves one page, configuration comes from the environment, and a dependency container manages object lifetimes correctly.
+
+1. Application factory
+You learned to create the Flask app through a function such as create_app() instead of creating one global application immediately.
+
+Why it matters
+An application factory allows you to create different app instances for: development, testing, production.
+Tests can use a different database and settings without modifying the development application.
+
+Main flow : This keeps application assembly in one predictable place.
+
+create_app()
+    ↓
+load configuration
+    ↓
+initialize extensions
+    ↓
+create dependency container
+    ↓
+register blueprints
+    ↓
+return Flask app
+
+
+2. Configuration management
+You learned to keep configuration separate from application logic.
+Configuration values include:
+
+- Flask secret key,
+- database URL,
+- debug mode,
+- testing mode.
+
+The intended flow is:
+.env.local
+    ↓
+environment variables
+    ↓
+configuration object
+    ↓
+Flask application
+
+Important lesson: fail fast
+Required settings should be checked when the app starts.
+For example, if the Flask secret key is missing, the app should show a clear startup error instead of failing unexpectedly during a later request.
+
+.env.local vs .env.example
+.env.local:
+- contains your real local values,
+- must not be committed,
+- is ignored by Git.
+
+.env.example:
+- contains placeholder values,
+- documents required configuration,
+- can be committed.
+
+
+3. Blueprint and route organization
+You created a blueprint and a simple home route.
+A blueprint groups related routes together. Later, the project can have separate modules for:
+- authentication,
+- tic-tac-toe,
+- Guess Who?,
+- Pedantle,
+- administration,
+- scores.
+
+Why start with one route? The first route proves that the application wiring works:
+a. Flask starts,
+b. configuration loads,
+c. the blueprint is registered,
+d. routing works,
+e. templates are found,
+f. HTML is returned.
+It is a wiring test, not yet a game feature.
+
+
+4. Templates
+You created a first Jinja template for the home page.
+This introduced the basic request flow:
+browser request
+    ↓
+Flask route
+    ↓
+render_template()
+    ↓
+Jinja HTML template
+    ↓
+browser response
+
+This will later grow into: layout.html, reusable Jinja macros, game-specific templates, forms, dashboards.
+
+
+5. Running Flask locally
+You learned that, during the early phases: PostgreSQL runs inside Docker and Flask runs inside your local Python virtual environment. This is intentional.
+The roadmap delays full application Dockerization until Phase 10 because Dockerizing the app too early adds another possible source of bugs while you are still learning Flask.
+The application was started with the Flask factory and tested in the browser.
+
+
+6. Dependency injection
+Dependency injection means a class receives the objects it needs instead of creating them internally.
+
+Less flexible approach : UserService creates its own database object
+Better approach : Container creates the database object UserService receives the database object
+
+The dependency container centralizes object creation and makes it easier to : replace implementations, test services, control object lifetimes, avoid duplicated setup code.
+
+
+7. The dependency container
+You created a small container with two important operations: register(), resolve()
+
+- register() : Tells the container what dependency exists, how to create it, which lifetime it uses.
+- resolve() : Requests an instance from the container.
+
+The roadmap specifically recommends keeping the container simple. You do not need, at this stage:
+- automatic dependency discovery,
+- complex type-hint auto-wiring,
+- decorator-based registration,
+- plugin systems,
+- lazy module loading.
+The purpose is to understand dependency lifetimes, not to build a framework inside your framework.
+
+
+8. The three dependency lifetimes
+
+A. Singleton : One object for the entire Flask process.
+
+Use for configuration, password hashing services, JWT encoders, stateless shared utilities.
+
+Behavior:
+resolve() → object A
+resolve() → object A
+
+The same object is reused.
+
+
+B. Scoped : One object per request.
+
+Use for database sessions, units of work, current user, request-specific state.
+
+Within one request:
+resolve() → object A
+resolve() → object A
+
+During a new request:
+resolve() → object B
+
+Object A and object B are different.
+
+C. Transient : A new object every time it is resolved.
+
+Use for small stateless helpers, cheap formatters, short-lived utility objects.
+
+Behavior:
+resolve() → object A
+resolve() → object B
+
+The two objects are different even during the same request.
+
+
+9. Why lifetime rules matter
+You learned that a long-lived object must not retain a shorter-lived object.
+
+Dangerous example:
+Singleton service → scoped database session
+The singleton could capture one request’s database session and reuse it for later requests.
+
+This may cause:
+- stale transactions,
+- closed sessions,
+- request data leaking between users,
+- intermittent database errors,
+- connection pool exhaustion.
+
+The important rule is:
+Singleton → singleton dependencies only
+Scoped → scoped or singleton dependencies
+
+This is one of the main architectural lessons in Phase 1.
+
+
+10. Request scope and Flask context
+Scoped dependencies were connected to Flask’s request context using flask.g.
+The lifecycle is:
+
+request starts
+    ↓
+create scoped storage
+    ↓
+resolve scoped objects when needed
+    ↓
+request ends
+    ↓
+clean up scoped objects
+
+Why cleanup matters
+Later, scoped dependencies may contain: database sessions, transactions, file handles, network resources.
+If they are not cleaned up, each request may leave resources open until the application becomes unstable.
+The teardown function ensures that resources are closed at the end of the request.
+
+
+11. Step verification
+You used a temporary identity service and debug route to verify the three lifetimes.
+
+The test checked:
+- singleton resolutions return the same object,
+- scoped resolutions return the same object within one request,
+- transient resolutions return different objects.
+
+Expected behavior:
+singleton_same_within_request = true
+scoped_same_within_request    = true
+transient_same_within_request = false
+
+After refreshing the route:
+
+- singleton ID should remain the same,
+- scoped ID should change,
+- transient IDs should be different each time.
+The debug route was temporary and should be removed after verification.
+This verification matters because it proves that the container is not merely storing registrations; it is enforcing the intended lifecycle behavior.
+
+
+12. testing commands
+Useful commands included: .\.venv\Scripts\Activate.ps1
+Activates the virtual environment.
+
+Starts Flask using the application factory :
+python -m flask --app app:create_app run --debug
+
+Checks that Python files compile successfully :
+python -m compileall app
+
+Shows changed and untracked files : 
+git status
+
+Commits and pushes the safe Phase 1 files :
+git add app .env.example
+git commit -m "Build Flask application foundation"
+git push
+
+You must not commit .env.local.
+
