@@ -1,0 +1,173 @@
+Phase 2 : database schema and migrations
+
+The main goal was to define the relational model, connect SQLAlchemy to Flask, create migrations, and prove that migrations can be rolled back and reapplied.
+
+
+1. Database design before coding
+You designed the main entities and relationships before implementing them. The schema includes:
+- User
+- Role
+- Game
+- GameSession
+- Score
+- Character
+- Attribute
+- CharacterAttribute
+- PedantleArticle
+- PedantleWordScore
+- PedantleGuess
+This prevents expensive redesigns later because database changes require migrations and may affect services, controllers, tests, and existing data.
+
+
+2. Shared game sessions
+You chose one shared GameSession table. It contains common information such as:
+- user ownership,
+- game ownership,
+- session status,
+- game state,
+- start and finish times.
+The advantage is that you can query a player’s history across all games consistently.
+Game-specific details can still use separate child tables later.
+
+
+3. Separate leaderboards per game
+You chose one shared Score table with a required game_id. Important fields include:
+- user_id
+- game_id
+- game_session_id
+- score_type
+- score_value
+
+This allows separate rankings:
+- Tic-tac-toe: wins, highest first
+- Guess Who?: questions used, lowest first
+- Pedantle: guesses used, lowest first
+Players are never compared across different games because leaderboard queries filter by game_id.
+
+
+4. Flask-SQLAlchemy setup
+You added extensions.py with:
+db = SQLAlchemy()
+migrate = Migrate()
+
+Then the application factory initializes them:
+create_app()
+    ↓
+load configuration
+    ↓
+initialize SQLAlchemy
+    ↓
+initialize Flask-Migrate
+    ↓
+import models
+    ↓
+register blueprints
+Importing the models inside the factory ensures Flask-Migrate can discover their metadata.
+
+
+5. Base entity
+You created BaseEntity with fields shared by persistent models:
+- id
+- created_at
+- updated_at
+- deleted_at
+The model classes inherit from it instead of repeating these columns.
+This gives you consistency and prepares the application for soft deletion.
+
+
+6. Soft deletion
+Soft deletion does not physically remove a row. Instead, it sets:
+deleted_at = timestamp
+
+The row remains available for history or recovery, but application queries should normally ignore it.
+You also handled the unique-constraint issue with PostgreSQL partial unique indexes:
+- active user emails must be unique,
+- active game slugs must be unique,
+- deleted rows do not block reuse.
+
+The indexes use the condition:
+deleted_at IS NULL
+
+
+7. Guess Who? many-to-many design
+You modeled the relationship using:
+- Character
+- Attribute
+- CharacterAttribute  (is an association object because the realtionship has extra data (value) and uniqueness constraint (same attribute cannot be attached to the same character twice)
+
+
+
+8. Pedantle database design
+You created:
+- PedantleArticle
+- PedantleWordScore   (has a composite index on article_id + word -> efficient lookup when player guesses a word)
+- PedantleGuess
+
+
+9. Python and ORM verification
+Before using PostgreSQL migrations, you tested the model mappings with an in-memory SQLite database. The test successfully created 12 model tables.
+
+
+10. PostgreSQL connection troubleshooting
+You learned that:
+- PostgreSQL inside Docker uses port 5432,
+- the Windows host connection uses the published port,
+- changing .env.local does not change the password inside an existing database volume,
+- a running container does not automatically mean authentication is correct.
+The original host port 5432 conflicted with another local listener, so you changed the Compose mapping to: 5433:5432
+
+
+11. Alembic migrations
+You initialized migrations with:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db init
+
+And generate the initial migration with:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db migrate -m "Create initial domain schema"
+
+The migration file was created at: migrations/versions/882b1b080ecf_create_initial_domain_schema.py
+
+You learned to read generated migrations instead of trusting autogeneration blindly. You checked for:
+- expected tables,
+- foreign keys,
+- indexes,
+- unique constraints,
+- correct downgrade operations.
+
+
+12. Applying and rolling back migrations
+You applied the migration with:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db upgrade
+
+You rolled it back with:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db downgrade
+
+Then you reapplied it with:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db upgrade
+
+
+
+13. Flask CLI lesson
+You learned that this is invalid:
+db upgrade
+
+PowerShell interprets db as a standalone command. The correct command includes Flask:
+.\.venv\Scripts\python.exe -m flask --app app:create_app db upgrade
+
+
+Here:
+- flask launches Flask’s CLI,
+- db selects the Flask-Migrate command group,
+- upgrade applies migrations.
+
+
+14. Common mistakes you learned to avoid
+Changing .env.local without changing the existing PostgreSQL role password.
+Assuming “database ready” means authentication is correct.
+Changing the internal PostgreSQL port unnecessarily.
+Running db upgrade without the Flask command.
+Trusting autogenerated migrations without reading them.
+Editing an already-applied migration.
+Forgetting to commit migration files.
+Treating soft deletion as ordinary deletion.
+Comparing scores from different games.
+Forgetting indexes for frequent lookups.
