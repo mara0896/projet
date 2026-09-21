@@ -1,4 +1,5 @@
-# The repo contains database access only (how to query, filter deleted rows, save entities...)
+# The repo contains database access only 
+# (how to query, filter deleted rows, save entities...)
 from sqlalchemy import select
 
 from ...extensions import db
@@ -13,7 +14,7 @@ class GameRepository:
         statement = (
             select(Game)
             .where(
-                Game.deleted_at.is_(None),     # Filter out deleted/inactive games
+                Game.deleted_at.is_(None),  # Filter deleted/inactive
                 Game.is_active.is_(True),
             )
             .order_by(Game.name.asc())

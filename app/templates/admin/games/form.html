@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+
+    <form method="post">
+        {{ form.hidden_tag() }}
+
+        <p>
+            {{ form.slug.label }}
+            {{ form.slug() }}
+
+            {% for error in form.slug.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.name.label }}
+            {{ form.name() }}
+
+            {% for error in form.name.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        </p>
+
+        <p>
+            {{ form.description.label }}
+            {{ form.description() }}
+        </p>
+
+        <p>
+            {{ form.thumbnail.label }}
+            {{ form.thumbnail() }}
+        </p>
+
+        <p>
+            {{ form.is_active() }}
+            {{ form.is_active.label }}
+        </p>
+
+        {{ form.submit() }}
+    </form>
+{% endblock %}

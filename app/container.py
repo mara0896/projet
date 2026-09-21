@@ -6,6 +6,9 @@ from typing import Any
 
 from flask import g, has_request_context
 
+from .modules.game.repository import GameRepository
+from .modules.game.service import GameService
+
 
 class Lifetime(Enum):
     SINGLETON = "singleton"
@@ -72,6 +75,20 @@ def create_container() -> Container:
     container.register(
         "greeting_service",
         GreetingService,
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "game_repository",
+        GameRepository,
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "game_service",
+        lambda: GameService(
+            container.resolve("game_repository")
+        ),
         Lifetime.SCOPED,
     )
 

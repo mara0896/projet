@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h1>Games</h1>
+
+    {% if games %}
+        <div class="game-grid">
+            {% for game in games %}
+                <article class="game-card">
+                    {% if game.thumbnail %}
+                        <img
+                            src="{{ game.thumbnail }}"
+                            alt="{{ game.name }}"
+                        >
+                    {% endif %}
+
+                    <h2>{{ game.name }}</h2>
+                    <p>{{ game.description }}</p>
+
+                    <a href="/games/{{ game.slug }}">
+                        Play
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No games are available yet.</p>
+    {% endif %}
+{% endblock %}

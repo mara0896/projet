@@ -4,13 +4,14 @@ from flask import Flask, g
 
 from .config import get_config
 from .container import create_container
-from .extensions import db, migrate
+from .extensions import db, migrate, csrf
+from .modules.game.controller import game_bp
+from .modules.game.admin_controller import admin_game_bp
 
 
 # Flask app Factory function
 # Create a new app every time this function is called.
 # This allows separate development and test app instances.
-
 def create_app(config_name: str = "development") -> Flask:
     app = Flask(__name__)
 
@@ -25,6 +26,7 @@ def create_app(config_name: str = "development") -> Flask:
 
     db.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
 
     # Import models so Flask-Migrate can discover their metadata.
     from . import models  # noqa: F401
@@ -47,5 +49,7 @@ def create_app(config_name: str = "development") -> Flask:
     from .routes import main_bp
 
     app.register_blueprint(main_bp)
+    app.register_blueprint(game_bp)
+    app.register_blueprint(admin_game_bp)
 
     return app
