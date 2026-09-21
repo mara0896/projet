@@ -34,3 +34,16 @@ class AuthenticationRequired(DomainError):
 # ex : a regular player visiting an admin route
 class PermissionDenied(DomainError):
     pass
+
+
+# TICTACTOE ----------------------------------------------------------
+class TicTacToeInvalidMove(DomainError):
+    pass
+
+
+class TicTacToeSessionNotFound(DomainError):
+    pass
+
+
+class TicTacToeGameFinished(DomainError):
+    pass
