@@ -9,6 +9,11 @@ from flask import g, has_request_context
 from .modules.game.repository import GameRepository
 from .modules.game.service import GameService
 
+from .core.security.hashing import PasswordHashing
+from .core.security.jwt import JWTService
+from .modules.auth.repository import UserRepository
+from .modules.auth.service import AuthService
+
 
 class Lifetime(Enum):
     SINGLETON = "singleton"
@@ -69,7 +74,7 @@ class GreetingService:
         return "Dependency injection is working."
 
 
-def create_container() -> Container:
+def create_container(config=None) -> Container:
     container = Container()
 
     container.register(
@@ -88,6 +93,36 @@ def create_container() -> Container:
         "game_service",
         lambda: GameService(
             container.resolve("game_repository")
+        ),
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "password_hasher",
+        PasswordHashing,
+        Lifetime.SINGLETON,
+    )
+
+    container.register(
+        "jwt_service",
+        lambda: JWTService(
+            secret_key=config.jwt_secret_key,
+            expires_minutes=config.jwt_expires_minutes,
+        ),
+        Lifetime.SINGLETON,
+    )
+
+    container.register(
+        "user_repository",
+        UserRepository,
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "auth_service",
+        lambda: AuthService(
+            users=container.resolve("user_repository"),
+            hasher=container.resolve("password_hasher"),
         ),
         Lifetime.SCOPED,
     )

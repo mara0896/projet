@@ -1,11 +1,5 @@
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    url_for,
-)
+from flask import Blueprint, current_app, flash, redirect, render_template, url_for
+from ...core.security.decorators import auth_required
 
 from ...container import Container
 from ...core.errors import GameSlugAlreadyExists
@@ -26,6 +20,7 @@ def _service():
 
 
 @admin_game_bp.get("")
+@auth_required(roles=("admin",))
 def list_admin_games():
     games = _service().find_all_games()
     game_dtos = [GameMapper.to_admin(game) for game in games]
@@ -37,6 +32,7 @@ def list_admin_games():
 
 
 @admin_game_bp.route("/new", methods=["GET", "POST"])
+@auth_required(roles=("admin",))
 def create_game():
     form = GameForm()
 
@@ -61,7 +57,9 @@ def create_game():
         title="Create game",
     )
 
+
 @admin_game_bp.route("/<int:game_id>/edit", methods=["GET", "POST"])
+@auth_required(roles=("admin",))
 def edit_game(game_id: int):
     service = _service()
     game = service.find_one(game_id)
@@ -89,7 +87,9 @@ def edit_game(game_id: int):
         title="Edit game",
     )
 
+
 @admin_game_bp.post("/<int:game_id>/delete")
+@auth_required(roles=("admin",))
 def delete_game(game_id: int):
     _service().delete(game_id)
 

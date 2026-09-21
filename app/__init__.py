@@ -1,12 +1,15 @@
 # Creates Flask app instance and initializes extensions
 
-from flask import Flask, g
+from flask import Flask, g, jsonify, redirect, request, url_for
 
 from .config import get_config
+from .routes import main_bp
 from .container import create_container
 from .extensions import db, migrate, csrf
 from .modules.game.controller import game_bp
 from .modules.game.admin_controller import admin_game_bp
+from .modules.auth.controller import auth_bp
+from .core.errors import AuthenticationRequired, PermissionDenied
 
 
 # Flask app Factory function
@@ -31,7 +34,7 @@ def create_app(config_name: str = "development") -> Flask:
     # Import models so Flask-Migrate can discover their metadata.
     from . import models  # noqa: F401
 
-    app.extensions["container"] = create_container()
+    app.extensions["container"] = create_container(config)
 
     # Flask runs cleanup after each request
     @app.teardown_request
@@ -46,10 +49,29 @@ def create_app(config_name: str = "development") -> Flask:
 
         g.pop("_scoped_dependencies", None)
 
-    from .routes import main_bp
+    # error handler
+    @app.errorhandler(AuthenticationRequired)
+    def handle_authentication_required(error):
+        if request.path.startswith("/api/"):
+            return jsonify(error="Authentication required"), 401
+
+        return redirect(
+            url_for(
+                "auth.login",
+                next=request.path,
+            )
+        )
+
+    @app.errorhandler(PermissionDenied)
+    def handle_permission_denied(error):
+        if request.path.startswith("/api/"):
+            return jsonify(error="Permission denied"), 403
+
+        return "Forbidden", 403
 
     app.register_blueprint(main_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(admin_game_bp)
+    app.register_blueprint(auth_bp)
 
     return app

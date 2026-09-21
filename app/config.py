@@ -12,6 +12,8 @@ load_dotenv(".env.local")
 class Config:               # Typed container for app configuration
     secret_key: str
     database_url: str
+    jwt_secret_key: str
+    jwt_expires_minutes: int
     debug: bool = False
     testing: bool = False
 
@@ -43,6 +45,8 @@ def get_config(config_name: str = "development") -> Config:
             "DATABASE_URL",
             "postgresql+psycopg://postgres:secret@localhost:5432/mydb",
         ),
+        jwt_secret_key=_required_env("JWT_SECRET_KEY"),
+        jwt_expires_minutes=int(os.getenv("JWT_EXPIRES_MINUTES", "30")),
         debug=config_name == "development",
         testing=False,
     )
