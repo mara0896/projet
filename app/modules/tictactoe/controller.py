@@ -4,6 +4,7 @@ from flask import (
     g,
     jsonify,
     request,
+    render_template
 )
 
 from ...container import Container
@@ -21,6 +22,8 @@ tictactoe_bp = Blueprint(
     __name__,
     url_prefix="/api/tictactoe",
 )
+
+tictactoe_page_bp = Blueprint("tictactoe_page", __name__)
 
 
 def _service():
@@ -112,3 +115,9 @@ def play_move(session_id: int):
     return jsonify(
         _state_response(game_session)
     )
+
+
+@tictactoe_page_bp.get("/games/tic-tac-toe")
+@auth_required()
+def play_page():
+    return render_template("tictactoe/play.html")

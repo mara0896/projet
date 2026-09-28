@@ -1,10 +1,21 @@
 async function request(url, options = {}) {
+  const method = (options.method || "GET").toUpperCase();
+  const headers = new Headers(options.headers || {});
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  if (!["GET", "HEAD", "OPTIONS"].includes(method) && csrfToken) {
+    headers.set("X-CSRFToken", csrfToken);
+  }
+
   const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
     ...options,
+    method,
+    headers,
+    credentials: "same-origin",
   });
 
   const data = await response.json();

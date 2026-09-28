@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Mini-Games Platform{% endblock %}</title>
 </head>
 <body>
     {% with messages = get_flashed_messages(with_categories=true) %}
+    {% block styles %}{% endblock %}
         {% for category, message in messages %}
             <p>{{ message }}</p>
         {% endfor %}

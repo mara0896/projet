@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import datetime, timezone
 
 from ...core.errors import (
@@ -66,7 +67,9 @@ class TicTacToeService:
         if game_session.status != "active":
             raise TicTacToeGameFinished()
 
-        state = game_session.state
+        # SQLAlchemy's plain JSON type does not track nested in-place changes.
+        # Work on a detached copy, then assign it back so the ORM persists it.
+        state = deepcopy(game_session.state)
         board = state["board"]
         turn = state["turn"]
 

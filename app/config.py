@@ -37,6 +37,8 @@ def get_config(config_name: str = "development") -> Config:
             database_url="sqlite:///:memory:",
             debug=False,
             testing=True,
+            jwt_secret_key="testing-jwt-secret-key-at-least-32-bytes",
+            jwt_expires_minutes=30,
         )
 
     return Config(

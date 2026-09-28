@@ -9,8 +9,13 @@ from .extensions import db, migrate, csrf
 from .modules.game.controller import game_bp
 from .modules.game.admin_controller import admin_game_bp
 from .modules.auth.controller import auth_bp
-from .core.errors import AuthenticationRequired, PermissionDenied, TicTacToeSessionNotFound
-from .modules.tictactoe.controller import tictactoe_bp
+from .core.errors import (
+    AuthenticationRequired,
+    PermissionDenied,
+    TicTacToeSessionNotFound,
+)
+from .modules.tictactoe.controller import (tictactoe_bp, tictactoe_page_bp,)
+
 
 # Flask app Factory function
 # Create a new app every time this function is called.
@@ -25,6 +30,9 @@ def create_app(config_name: str = "development") -> Flask:
         SQLALCHEMY_DATABASE_URI=config.database_url,
         DEBUG=config.debug,
         TESTING=config.testing,
+        JWT_SECRET_KEY=config.jwt_secret_key,
+        JWT_EXPIRES_MINUTES=config.jwt_expires_minutes,
+        WTF_CSRF_ENABLED=not config.testing,
     )
 
     db.init_app(app)
@@ -78,5 +86,6 @@ def create_app(config_name: str = "development") -> Flask:
     app.register_blueprint(admin_game_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(tictactoe_bp)
+    app.register_blueprint(tictactoe_page_bp)
 
     return app
