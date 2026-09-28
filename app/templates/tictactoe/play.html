@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/tictactoe.css') }}"
+    >
+{% endblock %}
+
+{% block content %}
+    <h1>Tic-tac-toe</h1>
+
+    <p id="message">Starting game...</p>
+
+    <div id="board" class="ttt-board"></div>
+
+    <button id="new-game" type="button">
+        New game
+    </button>
+
+    <script
+        type="module"
+        src="{{ url_for(
+            'static',
+            filename='js/games/tictactoe.js'
+        ) }}"
+    ></script>
+{% endblock %}

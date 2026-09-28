@@ -8,12 +8,13 @@ from flask import g, has_request_context
 
 from .modules.game.repository import GameRepository
 from .modules.game.service import GameService
+from .modules.auth.repository import UserRepository
+from .modules.auth.service import AuthService
+from .modules.tictactoe.repository import TicTacToeRepository
+from .modules.tictactoe.service import TicTacToeService
 
 from .core.security.hashing import PasswordHashing
 from .core.security.jwt import JWTService
-from .modules.auth.repository import UserRepository
-from .modules.auth.service import AuthService
-
 
 class Lifetime(Enum):
     SINGLETON = "singleton"
@@ -123,6 +124,20 @@ def create_container(config=None) -> Container:
         lambda: AuthService(
             users=container.resolve("user_repository"),
             hasher=container.resolve("password_hasher"),
+        ),
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "tictactoe_repository",
+        TicTacToeRepository,
+        Lifetime.SCOPED,
+    )
+
+    container.register(
+        "tictactoe_service",
+        lambda: TicTacToeService(
+            container.resolve("tictactoe_repository")
         ),
         Lifetime.SCOPED,
     )
